@@ -1,55 +1,140 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
-
+<?php 
 class Connect extends MY_Controller {
 
-   function __construct(){
-      parent::__construct();
-      $this->load->helper(array('datagrid','url'));
-      $this->Datagrid = new Datagrid('users','id');
-   }
-    
-   function index(){
-      $this->load->helper('form');
-      $this->load->library('session');
- 
-      $this->Datagrid->hidePkCol(true);
-      $this->Datagrid->setHeadings(array('email'=>'E-mail'));
-      $this->Datagrid->ignoreFields(array('password'));
-       
-      if($error = $this->session->flashdata('form_error')){
-         echo "<font color=red>$error</font>";
-      }
-      echo form_open('Connect/proc');
-      echo $this->Datagrid->generate();
-      echo Datagrid::createButton('delete','Delete');
-      echo form_close();
-   }
-    
-   function proc($request_type = ''){
-      $this->load->helper('url');
-      if($action = Datagrid::getPostAction()){
-         $error = "";
-         switch($action){
-            case 'delete' :
-               if(!$this->Datagrid->deletePostSelection()){
-                  $error = 'Items could not be deleted';
-               }
-            break;
-         }
-         if($request_type!='ajax'){
-            $this->load->library('session');
-            $this->session->set_flashdata('form_error',$error);
-            redirect('connect/index');
-         } else {
-            echo json_encode(array('error' => $error));
-         }
-      } else {
-         die("Bad Request");
-      }
-   }
- 
-}
-?>
-    }
+	function __construct()
+	{
+		//Construct class and load extras
+		parent::__construct();
+		$this->load->helper('language');
+		$this->load->library('datatables');
+		$this->load->library('form_validation');
+		$this->load->helper('form');
+		$this->load->helper('url');
+		$this->load->model('connect_edit');
+		$this->lang->load('auth');
+	}
+	public function index()
+	{
+		//Main index page that shows device list
+		if(!empty($_GET['filter']))
+		{
+		$data['filter'] = $_GET['filter'];
+		$this->template->load('base', 'connect_view', $data);
+		}
+		else
+		{
+		$this->template->load('base', 'connect_view');
+		}
+	}
+	public function firewall()
+	{
+		//Main index page that shows device list
+		$this->template->load('base', 'connect_view');
 
+	}
+	public function ajax()
+	{
+		if(!empty($_GET['filter']))
+		{
+		$deviceType = $_GET['filter'];
+		$datatables = new Datatables();  // for mysqli  =>  $datatables = new Datatables('mysqli'); 
+		$array = array('adminStatus' => 'active', 'deviceType' => $deviceType);
+		$datatables
+		->select('id, nodeName, site, ipAddress, ,nodeDescription, connectProtocol')
+		->from('netdevices')
+		->where($array);
+		}
+		else
+		{
+		$datatables = new Datatables();  // for mysqli  =>  $datatables = new Datatables('mysqli'); 
+		$datatables
+		->select('id, nodeName, site, ipAddress, ,nodeDescription, connectProtocol')
+		->from('netdevices')
+		->where('adminStatus','active');
+		}
+		$datatables->unset_column('id');
+		$datatables->add_column('edit', '<div class="btn-group"><button type="button" class="btn btn-default btn-warning btn-sm"><a href="connect/edit_device?id=$1"><i class="icon-edit icon-w"></i></a></button><button type="button" class="btn btn-danger btn-sm"><a href="connect/delete_device?id=$1"><i class="icon-trash icon-w"></i></a></button></div>', 'id');
+		
+		
+		echo $datatables->generate();
+	}
+	public function add_device()
+	{
+		//add new device
+		if (!$this->ion_auth->logged_in() || !$this->ion_auth->is_admin())
+		{
+			redirect('auth', 'refresh');
+		}
+	}
+	public function edit_device()
+	{
+		//edit exisiting device
+		
+		if (!$this->ion_auth->logged_in() || !$this->ion_auth->is_admin())
+		{
+			redirect('auth', 'refresh');
+		}
+		//Validate form
+		$this->form_validation->set_error_delimiters('<br /><span class="help-block alert alert-danger">', '</span>');
+		if ($this->form_validation->run('edit_device') == FALSE)
+		{
+					if (isset($_GET['message']))
+					{
+						$data = $this->connect_edit->GetData($_GET['id']);
+						$data['message'] = $_GET['message'];
+						$data['user']=$this->ion_auth->user()->row();
+						//$this->load->view('device_connect_edit_view',$data);
+						$this->template->load('base', 'device_connect_edit_view', $data);
+
+					}
+					else
+					{
+						$data = $this->connect_edit->GetData($_GET['id']);
+						$data['user']=$this->ion_auth->user()->row();
+						$this->template->load('base', 'device_connect_edit_view', $data);
+					}
+		}
+		else // passed validation proceed to post success logic
+		{
+			// build array for the model
+			$form_data = array(
+				'id' => set_value('id'),
+				'nodeName' => set_value('nodeName'),
+				'nodeDescription' => set_value('nodeDescription'),
+				'adminStatus' => set_value('adminStatus'),
+				'assetID' => set_value('assetID'),
+				'ipAddress' => set_value('ipAddress'),
+				'authMethod' => set_value('authMethod'),
+				'connectProtocol' => set_value('connectProtocol'),
+				'deviceType' => set_value('deviceType'),
+				'make' => set_value('make'),
+				'model' => set_value('model'),
+				'site' => set_value('site'),
+				'room' => set_value('room'),
+				'rack' => set_value('rack')
+			);
+
+			// run insert model to write data to db
+			if ($this->connect_edit->EditForm($form_data) == TRUE) // the information has therefore been successfully saved in the db
+			{
+					redirect('connect/edit_device?id='.$form_data['id'].'&message=success');   // or whatever logic needs to occur
+			}
+			else
+			{
+				redirect('connect/edit_device?id='.$_POST['id'].'&message=error');
+			}
+		}
+
+	}
+	public function delete_device()
+	{
+		//delete device
+		if (!$this->ion_auth->logged_in() || !$this->ion_auth->is_admin())
+		{
+			redirect('auth', 'refresh');
+		}
+	}
+	
 }
+
+

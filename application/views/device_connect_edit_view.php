@@ -6,19 +6,25 @@
 
 		<p class="lead"><?php echo lang('device_connect_edit_subheading');?></p>
 <?php if (isset($message) && ($message == 'success')):?>
-			<div class="alert alert-success"><b>Thank you</b>: The details for this device have now been successfully added</div>
+			<div class="alert alert-success"><b>Thank you</b>: The details for this device have now been successfully updated</div>
 <?php elseif (isset($message) && ($message == 'error')):?>
-<div class="alert alert-danger"><b>Sorry</b>: An error has occurred, please try again.</div>
+<div class="alert alert-danger"><b>Sorry</b>: An error has occurred, please try again. Maybe you didn't change anything?</div>
 <?php endif ?>
 <div class="row">
   <div class="col-md-12">
 <?php // Change the css classes to suit your needs
 $attributes = array('class' => 'form-horizontal', 'role' => 'form');
-echo form_open('device_connect_edit', $attributes); ?>
+$form_url = ('connect/edit_device?id='.$netDevice[0]->id);
+echo form_open($form_url, $attributes); ?>
 
 <?php
-if (isset($netDevice[0]->id)){echo form_hidden('id', set_value('id',isset($netDevice[0]->id)));}?>
-
+if (isset($netDevice[0]->id)){
+	echo form_hidden('id', $netDevice[0]->id);
+	}
+else {
+	echo form_hidden('id', set_value('id'));
+}
+?>
 <div class="form-group">
         <label for="nodeName" class="col-lg-3 control-label">Device Name <span class="required">*</span></label>
         <div class="col-lg-4">

@@ -43,7 +43,7 @@ class Connect_edit extends CI_Model {
 		}
 		else
 		{
-		return FALSE;
+			return FALSE;
 		}
 	}
 	function GetData($id)

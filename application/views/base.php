@@ -13,8 +13,7 @@
 
         <link rel="stylesheet" href="<?=base_url();?>static/css/bootstrap.min.css">
         <link rel="stylesheet" href="<?=base_url()?>static/css/style.css">
-        <link rel="stylesheet" href="<?=base_url()?>static/css/fontawesome.css">
-        <link rel="stylesheet" href="<?=base_url()?>static/css/fonta.css">
+        <link rel="stylesheet" href="<?=base_url()?>static/css/font-awesome.css">
         <!--<link rel="stylesheet" href="<?=base_url()?>static/css/main.css">-->
         <!-- <link rel="stylesheet" href="<?=base_url()?>static/css/bootstrap-responsive.min.css"> -->
 
@@ -81,8 +80,8 @@
 						<?php endif ?>
 						<li<?=($this->uri->segment(1) == 'mrtg' ? ' class="active"' : '');?>>
 						<?=anchor('mrtg', '<i class="icon-bar-chart"></i> MRTG Graphs')?></li>
-						<li<?=($this->uri->segment(1) == 'device_connect' ? ' class="active"' : '');?>>
-						<?=anchor('device_connect', '<i class="icon-bolt"></i> Device Connect')?></li>
+						<li<?=($this->uri->segment(1) == 'connect' ? ' class="active"' : '');?>>
+						<?=anchor('connect', '<i class="icon-bolt"></i> Connect')?></li>
 						<li<?=($this->uri->segment(1) == 'firewall_connect' ? ' class="active"' : '');?>>
 						<?=anchor('firewall_connect', '<i class="icon-fire"></i> Firewall Connect')?></li>
 						<li<?=($this->uri->segment(1) == 'experiments' ? ' class="active"' : '');?>>

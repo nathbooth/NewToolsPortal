@@ -64,7 +64,7 @@ class Device_connect_edit extends MY_Controller {
 					$this->template->load('base', 'device_connect_edit_view', $data);
 				}
 			}
-			}
+		}
 		elseif ($this->form_validation->run() == FALSE)
 			{
 				if (isset($_GET['message']))
@@ -104,17 +104,17 @@ class Device_connect_edit extends MY_Controller {
 			{
 				if ($this->connect_edit->SaveForm($form_data) == TRUE) // the information has therefore been successfully saved in the db
 					{
-					redirect('device_connect_edit?&message=success');   // or whatever logic needs to occur
+					redirect('connect/device_edit?&message=success');   // or whatever logic needs to occur
 				}
 			}
 			else if ($this->connect_edit->EditForm($form_data) == TRUE) // the information has therefore been successfully saved in the db
 					{
 					echo $this->connect_edit->EditForm($form_data);
-					redirect('device_connect_edit?id='.$form_data['id'].'&message=success');   // or whatever logic needs to occur
+					redirect('connect/device_edit?id='.$form_data['id'].'&message=success');   // or whatever logic needs to occur
 				}
 			else
 			{
-				redirect('device_connect_edit?&message=error');
+				redirect('connect/device_edit?&message=error');
 			}
 		}
 	}
